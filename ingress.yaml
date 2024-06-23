@@ -17,3 +17,10 @@ spec:
             name: springapp-srv
             port: 
               number: 8080
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: nginx-init-srv
+            port:
+              number: 80

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-init-demo
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: nginx-init-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-init-demo
+    spec:
+      containers:
+      - name: nginx-init-demo
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: shared-data
+          mountPath: /usr/share/nginx/html
+      initContainers:
+      - name: alpine-init
+        image: alpine #since we want to run normal wget command we use alpine image
+        command: 
+        - wget # the command we wnat to execute
+        - "-O" # to provide the output
+        - "/var/tmp/index.html" # location where I want to store it
+        - https://github.com/dubareddy/testcode/blob/master/index.html?raw=true
+        volumeMounts: #the path we wnat to mount in this container, this is done after downloading
+        - name: shared-data
+          mountPath: /var/tmp
+      volumes:
+      - name: shared-data #this means this particular volume is mounted to both above containers
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-init-srv
+spec:
+  selector:
+    app: nginx-init-demo
+  ports:
+  - port: 80
+    targetPort: 80
+
