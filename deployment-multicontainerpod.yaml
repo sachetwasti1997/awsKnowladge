@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-init
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: nginx-init
+  template:
+    metadata:
+      labels:
+        app: nginx-init
+    spec:
+      containers:
+      - name: container-write
+        image: alpine
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        command: ["/bin/sh"] #equivalent to entrypoint in dockerfile, use shell called sh
+        args: ["-c", "while true;do date >> /var/tmp/index.html; sleep 10;done"]
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /var/tmp
+      - name: container-read
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports: 
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /usr/share/nginx/html #the volume will be mounted in this location in the contai
+      volumes:
+      - name: shared-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-init-dep-srv
+spec:
+  selector:
+    app: nginx-init
+  ports:
+  - port: 80
+    targetPort: 80

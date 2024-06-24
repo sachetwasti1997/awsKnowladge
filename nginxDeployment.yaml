@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nginx-init-demo
-        image: nginx
+        image: nginx:latest
         resources:
           limits:
             memory: "128Mi"
@@ -49,4 +49,19 @@ spec:
   ports:
   - port: 80
     targetPort: 80
+
+#kubectl rollout history deploy nginx-init-demo -- to find the rivisions of deployment
+#kubectl rollout status deploy nginx-init-demo -- to check the rollback status
+#kubectl rollout undo deploy nginx-init-demo --to-revision=1 -- rollback to revision 1
+#kubectl edit deploy <deploymentname>
+#kubectl set image deploy <name> serving-container=nginx:changed
+#kubectl delete --all rs --namespace=default -- to delete all replica sets of given namespace
+#-----------------------------------------
+# StrategyType:           RollingUpdate
+# MinReadySeconds:        0
+# RollingUpdateStrategy:  25% max unavailable, 25% max surge
+# MAX UNAVILABLE - Only certain number of pods are down while being updated - 75%up 25%down by default
+# MAX SURGE - When rolling update the old one pod is deleted only after, new one pod is created
+#             so we have a surge in pods, when new pod is just created, by default it is 25% surge
+#             which means we have 125% of pods once
 
