@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-depl
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-depl
+  template:
+    metadata:
+      labels:
+        app: nginx-depl
+    spec:
+      containers:
+      - name: nginx-depl
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: shared-data
+          mountPath: /usr/share/nginx/html
+      initContainers:
+      - name: alpine-init
+        image: alpine
+        command:
+        - "wget"
+        - "-O"
+        - "/var/tmp/index.html"
+        - https://github.com/dubareddy/testcode/blob/master/index.html?raw=true
+        volumeMounts:
+        - name: shared-data
+          mountPath: /var/tmp
+      volumes:
+      - name: shared-data
+        emptyDir: {}
+        
